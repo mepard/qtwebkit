@@ -1577,7 +1577,12 @@ void QtConnectionObject::execute(void** argv)
         args[i] = convertQVariantToValue(m_context, m_rootObject, QVariant(argType, argv[i+1]), ignoredException);
     }
 
-    JSObjectCallAsFunction(m_context, m_receiverFunction, m_receiver, argc, args.data(), 0);
+    JSValueRef exception = 0;
+    ExecState* exec = toJS(m_context);
+    JSObjectCallAsFunction(m_context, m_receiverFunction, m_receiver, argc, args.data(), &exception);
+    if (exception) {
+        throwError(exec, toJS(exec, exception));
+    }
 }
 
 bool QtConnectionObject::match(JSContextRef context, QObject* sender, int signalIndex, JSObjectRef receiver, JSObjectRef receiverFunction)
